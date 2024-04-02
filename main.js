@@ -1,5 +1,6 @@
 //initialize
 let legalSquares = [];
+let isWhiteTurn = true;
 const board = document.querySelectorAll(".square");
 const pieces = document.querySelectorAll(".piece");
 const piecesImages = document.querySelectorAll("img");
@@ -39,7 +40,14 @@ function allowDrop(event) {
 //transfer the piece.id as text during the drag and drop
 function drag(event) {
     const piece = event.target;
-    event.dataTransfer.setData("text",piece.id);
+    const pieceColor = piece.getAttribute("color");
+    //check who turn is it 
+    if ((isWhiteTurn && pieceColor === "white")||(!isWhiteTurn && pieceColor === "black")) {
+        event.dataTransfer.setData("text",piece.id);
+        // const startingSquareId = piece.parentNode.id;
+        // getPossibleMoves(startingSquareId,piece);
+    }
+    
 }
 //get the piece id and location then append it to the current drop target
 function drop(event) {
@@ -48,5 +56,30 @@ function drop(event) {
     const piece = document.getElementById(data);
     const destinationSquare = event.currentTarget;
     let destinationSquareId = destinationSquare.id;
-    destinationSquare.appendChild(piece);
+    //check if the destinationSquare is occupied and is it the same color
+    if (isSquareOccupied(destinationSquare) === "blank") {
+        destinationSquare.appendChild(piece);
+        //switch turn
+        isWhiteTurn = !isWhiteTurn;
+        return;
+    }
+    if ((isSquareOccupied(destinationSquare) !== "blank")) {
+        //remove the piece inside
+        while (destinationSquare.firstChild) {
+            destinationSquare.removeChild(destinationSquare.firstChild);
+        }
+        destinationSquare.appendChild(piece);
+        //switch turn
+        isWhiteTurn = !isWhiteTurn;
+        return;
+    }
+}
+//check if the square is occupied and return the color of the piece inside
+function isSquareOccupied(square) {
+    if (square.querySelector(".piece")) {
+        const color = square.querySelector(".piece").getAttribute("color");
+        return color;
+    } else {
+        return "blank";
+    }
 }
